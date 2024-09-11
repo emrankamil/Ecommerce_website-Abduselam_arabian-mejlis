@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/bson/bsonrw"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -34,6 +35,8 @@ type Collection interface {
 	Aggregate(context.Context, interface{}) (Cursor, error)
 	UpdateOne(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	Indexes() IndexView
+	CreateIndex(context.Context, IndexModel) (string, error)
 }
 
 type SingleResult interface {
@@ -66,6 +69,7 @@ type mongoCollection struct {
 	coll *mongo.Collection
 }
 
+
 type mongoSingleResult struct {
 	sr *mongo.SingleResult
 }
@@ -82,6 +86,12 @@ type nullawareDecoder struct {
 	defDecoder bsoncodec.ValueDecoder
 	zeroValue  reflect.Value
 }
+
+type IndexModel struct {
+	Keys    bson.D `json:"keys"`    // Keys is the specification of the index keys.
+	Options bson.D `json:"options"` // Options contains additional options for the index.
+}
+
 
 func (d *nullawareDecoder) DecodeValue(dctx bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
 	if vr.Type() != bsontype.Null {
@@ -137,10 +147,14 @@ func (md *mongoDatabase) Collection(colName string) Collection {
 	collection := md.db.Collection(colName)
 	return &mongoCollection{coll: collection}
 }
-
 func (md *mongoDatabase) Client() Client {
 	client := md.db.Client()
 	return &mongoClient{cl: client}
+}
+
+func (mc *mongoCollection) CreateIndex(context.Context, IndexModel) (string, error) {
+	rst, err := mc.coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{})
+	return rst, err
 }
 
 func (mc *mongoCollection) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) SingleResult {
@@ -265,4 +279,38 @@ func (mr *mongoCursor) Decode(v interface{}) error {
 
 func (mr *mongoCursor) All(ctx context.Context, result interface{}) error {
 	return mr.mc.All(ctx, result)
+}
+
+
+/// Session
+
+
+// Custom IndexView interface
+type IndexView interface {
+	List(ctx context.Context, opts ...*options.ListIndexesOptions) (Cursor, error)
+	CreateOne(ctx context.Context, model IndexModel, opts ...*options.CreateIndexesOptions) (string, error)
+}
+
+// Custom mongoIndexView struct that embeds the original MongoDB IndexView
+type mongoIndexView struct {
+	indexes mongo.IndexView
+}
+
+// Redefine the Indexes method to return the custom IndexView interface
+func (mc *mongoCollection) Indexes() IndexView {
+	return &mongoIndexView{indexes: mc.coll.Indexes()}
+}
+
+// Implement the List method for IndexView
+func (miv *mongoIndexView) List(ctx context.Context, opts ...*options.ListIndexesOptions) (Cursor, error) {
+	cursor, err := miv.indexes.List(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &mongoCursor{mc: cursor}, nil
+}
+
+// Implement the CreateOne method for IndexView
+func (miv *mongoIndexView) CreateOne(ctx context.Context, model IndexModel, opts ...*options.CreateIndexesOptions) (string, error) {
+	return miv.indexes.CreateOne(ctx, mongo.IndexModel{Keys: model.Keys}, opts...)
 }

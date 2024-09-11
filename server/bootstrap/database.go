@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func NewMongoDatabase(env *Env) mongo.Client {
@@ -76,14 +78,14 @@ func CreateTextIndex(db mongo.Database, colName string) {
 			log.Fatal(err)
 		}
 		// Check if the index name matches the one we want to create
-		if index["name"] == "author_text_title_text_content_text" {
+		if index["name"] == "title_text_description_text_category_text" {
 			indexExists = true
 			break
 		}
 	}
 
 	if !indexExists {
-		indexModel := mongo.IndexModel{Keys: bson.D{{Key: "author", Value: "text"}, {Key: "title", Value: "text"}, {Key: "content", Value: "text"}}}
+		indexModel := mongo.IndexModel{Keys: bson.D{{Key: "title", Value: "text"}, {Key: "description", Value: "text"}, {Key: "category", Value: "text"}}}
 
 		name, err := collection.Indexes().CreateOne(ctx, indexModel)
 		if err != nil {
