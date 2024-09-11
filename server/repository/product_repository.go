@@ -3,7 +3,9 @@ package repository
 import (
 	"abduselam-arabianmejlis/domain"
 	"abduselam-arabianmejlis/mongo"
+	"abduselam-arabianmejlis/redis"
 	"context"
+	"encoding/json"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,46 +15,88 @@ import (
 type productRepository struct {
 	database   mongo.Database
 	collection string
+	RedisClient redis.Client
 }
 
-func NewProductRepository(db mongo.Database, collection string) domain.ProductRepository {
+func NewProductRepository(db mongo.Database, collection string, redisClient redis.Client) domain.ProductRepository {
 	return &productRepository{
 		database:   db,
 		collection: collection,
+		RedisClient: redisClient,
 	}
 }
 
 func (r *productRepository) CreateProduct(c context.Context, product *domain.Product) (domain.Product, error) {
-	collection := r.database.Collection(r.collection)
-	_, err := collection.InsertOne(c, product)
-	return *product, err
+    // Insert the product into MongoDB
+    collection := r.database.Collection(r.collection)
+    _, err := collection.InsertOne(c, product)
+    if err != nil {
+        return *product, err
+    }
+
+    // Marshal the product to JSON for caching
+    productData, err := json.Marshal(product)
+    if err == nil {
+        _ = r.RedisClient.Set(c, product.ID.Hex(), productData, 0) 
+    }
+
+    return *product, nil
 }
 
-func (r *productRepository) GetProduct(c context.Context, id string) (*domain.Product, error) {
-	collection := r.database.Collection(r.collection)
+func (r *productRepository) GetProductByID(c context.Context, id string) (*domain.Product, bool, error) {
+	// collection := r.database.Collection(r.collection)
 
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
+	// objectID, err := primitive.ObjectIDFromHex(id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// var product domain.Product
+	// err = collection.FindOne(c, bson.M{"_id": objectID}).Decode(&product)
+	// if err != nil {
+	// 	if err == mongo.ErrNoDocuments {
+	// 		return nil, nil // product not found
+	// 	}
+	// 	return nil, err
+	// }
+
+	// return &product, nil
 
 	var product domain.Product
-	err = collection.FindOne(c, bson.M{"_id": objectID}).Decode(&product)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil // product not found
-		}
-		return nil, err
-	}
+	cachedProduct, err := r.RedisClient.Get(c, id).Bytes()
+    if err == nil {
+        if err := json.Unmarshal(cachedProduct, &product); err == nil {
+            return &product, true, nil
+        }
+    }
 
-	return &product, nil
+    collection := r.database.Collection(r.collection)
+    objectID, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        return nil, false, err
+    }
+
+    err = collection.FindOne(c, bson.M{"_id": objectID}).Decode(&product)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            return nil, false, nil // product not found
+        }
+        return nil, false, err
+    }
+
+    productData, err := json.Marshal(&product)
+    if err == nil {
+        _ = r.RedisClient.Set(c, id, productData, 0)
+    }
+
+    return &product, false, nil
 }
 
-func (r *productRepository) GetProducts(c context.Context, pagination *domain.Pagination) ([]*domain.Product, error) {
+func (r *productRepository) GetProducts(c context.Context, pagination *domain.Pagination, filter interface{}) ([]*domain.Product, error) {
 	collection := r.database.Collection(r.collection)
 
 	var products []*domain.Product
-	filter := bson.M{}
+
 	skip := int64((pagination.Page - 1) * pagination.PageSize)
 	limit := int64(pagination.PageSize)
 	opts := &options.FindOptions{
@@ -84,6 +128,7 @@ func (r *productRepository) UpdateProduct(c context.Context, product *domain.Pro
 		bson.M{"_id": product.ID},
 		bson.M{"$set": product},
 	)
+	r.RedisClient.Del(c, product.ID.Hex())
 	return err
 }
 
@@ -96,6 +141,10 @@ func (r *productRepository) DeleteProduct(c context.Context, id string) error {
 	}
 
 	_, err = collection.DeleteOne(c, bson.M{"_id": objectID})
+	if err != nil {
+		return err
+	}
+	err = r.RedisClient.Del(c, id)
 	return err
 }
 

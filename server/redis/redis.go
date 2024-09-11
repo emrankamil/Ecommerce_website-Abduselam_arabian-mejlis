@@ -8,12 +8,14 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+const Nil = redis.Nil
+
 type Client interface {
 	Connect(ctx context.Context) error
 	Disconnect(ctx context.Context) error
 	Ping(ctx context.Context) error
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
-	Get(ctx context.Context, key string) (interface{}, error)
+	Get(ctx context.Context, key string) *redis.StringCmd
 	HSet(ctx context.Context, key string, field string, value interface{}) error
 	HGet(ctx context.Context, key string, field string) (interface{}, error)
 	HGetAll(ctx context.Context, key string) (map[string]interface{}, error)
@@ -50,7 +52,7 @@ func NewClient(addr string) Client {
 		// panic(err.Error())
 	}
 
-	value, err := redisClient.Get(ctx, "test")
+	value, err := redisClient.Get(ctx, "test").Result()
 
 	if err == redis.Nil {
 		fmt.Println("key: test does not exist")
@@ -79,8 +81,8 @@ func (r *RedisClient) Set(ctx context.Context, key string, value interface{}, ex
 	return r.cl.Set(ctx, key, value, expiration).Err()
 }
 
-func (r *RedisClient) Get(ctx context.Context, key string) (interface{}, error) {
-	return r.cl.Get(ctx, key).Result()
+func (r *RedisClient) Get(ctx context.Context, key string) *redis.StringCmd {
+	return r.cl.Get(ctx, key)
 }
 
 func (r *RedisClient) HSet(ctx context.Context, key string, field string, value interface{}) error {

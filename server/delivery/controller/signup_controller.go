@@ -29,13 +29,13 @@ func (sc *SignupController) Signup(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	_, err = sc.UserUsecase.GetUserByEmail(c, request.Email)
 	if err == nil {
-		c.JSON(http.StatusConflict, domain.ErrorResponse{Message: "User already exists with the given email"})
+		c.JSON(http.StatusConflict, domain.ErrorResponse{Error: "User already exists with the given email"})
 		return
 	}
 
@@ -48,13 +48,13 @@ func (sc *SignupController) Signup(c *gin.Context) {
 
 	accessToken, err := sc.SignupUsecase.CreateAccessToken(&user, sc.Env.AccessTokenSecret, sc.Env.AccessTokenExpiryHour)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	refreshToken, err := sc.SignupUsecase.CreateRefreshToken(&user, sc.Env.RefreshTokenSecret, sc.Env.RefreshTokenExpiryHour)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -63,13 +63,13 @@ func (sc *SignupController) Signup(c *gin.Context) {
 
 	validationErr := infrastructure.ValidateUser(&user)
 	if validationErr != nil{
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: validationErr.Error()})
+		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
 
 	err = sc.SignupUsecase.Create(c, &user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -86,20 +86,20 @@ func (sc *SignupController) VerifyEmail(c *gin.Context){
 
 	err := c.ShouldBind(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	user, err := sc.UserUsecase.GetUserByEmail(c, request.Email)
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusNotFound, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	err = sc.SignupUsecase.VerifyEmail(c, request.Email, request.Verification_code)
 
 	if err != nil{
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -110,7 +110,7 @@ func (sc *SignupController) VerifyEmail(c *gin.Context){
 
 	err = sc.UserUsecase.UpdateUser(c, updatedUser)
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 

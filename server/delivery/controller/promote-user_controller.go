@@ -24,23 +24,23 @@ func (pc *PromoteController) PromoteUser(c *gin.Context) {
 	var userID = c.Param("id")
 	email, ok := c.Get("email")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
 	admin, err := pc.userUsecase.GetUserByEmail(c, email.(string))
 	if err != nil || admin.User_type != "ADMIN"{
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
 	err = pc.promoteUsecase.PromoteUser(c, userID)
 	if err != nil{
 		if err.Error() == "user with the given userID is not found"{
-			c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: err.Error()})
+			c.JSON(http.StatusNotFound, domain.ErrorResponse{Error: err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 			return
 	}
 
@@ -52,23 +52,23 @@ func (pc *PromoteController) DemoteUser(c *gin.Context) {
 	var userID = c.Param("id")
 	email, ok := c.Get("email")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
 	admin, err := pc.userUsecase.GetUserByEmail(c, email.(string))
 	if err != nil || admin.User_type != "ADMIN"{
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
 	err = pc.promoteUsecase.DemoteUser(c, userID)
 	if err != nil{
 		if err.Error() == "user with the given userID is not found"{
-			c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: err.Error()})
+			c.JSON(http.StatusNotFound, domain.ErrorResponse{Error: err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 			return
 	}
 	c.JSON(http.StatusOK, domain.SuccessResponse{Success: true, Message: "user demoted to USER"})

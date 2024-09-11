@@ -17,6 +17,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db mongo.Database, gin *gi
 	NewLoginRouter(env, timeout, db, publicRouter)
 	NewFogetPWRouter(env, timeout, db, publicRouter)
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
+	NewProductRouter(env, timeout, db, publicRouter, redisClient)
 
 	protectedRouter := gin.Group("")
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))

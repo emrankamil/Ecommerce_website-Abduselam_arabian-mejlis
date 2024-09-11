@@ -28,29 +28,29 @@ func (lc *LoginController) Login(c *gin.Context) {
 	var request domain.LoginRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:err.Error()})
 	}
 
 	user, err := lc.UserUsecase.GetUserByEmail(c, request.Email)
 	if err != nil {
-		c.JSON(http.StatusNotFound,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusNotFound,domain.ErrorResponse{Error:err.Error()})
 	}
 
 	
 	if err := infrastructure.VerifyPassword(request.Password, user.Password); err != nil{
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
 
 	accessToken, err := lc.LoginUsecase.CreateAccessToken(user, lc.Env.AccessTokenSecret, lc.Env.AccessTokenExpiryHour)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	refreshToken, err := lc.LoginUsecase.CreateRefreshToken(user, lc.Env.RefreshTokenSecret, lc.Env.RefreshTokenExpiryHour)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -63,7 +63,7 @@ func (lc *LoginController) Login(c *gin.Context) {
 	err = lc.UserUsecase.UpdateUser(c, updatedUser)
 
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -78,13 +78,13 @@ func (lc *LoginController) Login(c *gin.Context) {
 func (lc *LoginController) Logout(c *gin.Context) {
 	email, ok := c.Get("email")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
 	err := lc.LoginUsecase.LogoutUser(c, email.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 

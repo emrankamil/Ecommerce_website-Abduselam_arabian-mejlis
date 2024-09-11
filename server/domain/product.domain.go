@@ -18,18 +18,18 @@ const (
 )
 
 type Product struct {
-	ID           primitive.ObjectID `json:"id" bson:"_id"`
-	Name    	 string             `json:"author" bson:"author" required:"true"`
-	Images       []string           `json:"images" bson:"images"`
-	Description  string             `json:"title" bson:"title" required:"true"`
-	Category     string    			`json:"category" bson:"category" required:"true"`
-	Features     []string           `json:"features" bson:"features"`
-	Tags      	 []string           `json:"tags" bson:"tags"`
-	ColorOptions []ColorOption      `json:"color_options" bson:"color_options"`
-	IsAvailable  bool      			`json:"is_available" bson:"is_available"`
-	Views        int       			`json:"views" bson:"views"`
-	CreatedAt 	 time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt 	 time.Time          `json:"updated_at" bson:"updated_at"`
+	ID           primitive.ObjectID  `json:"id" bson:"_id"`
+	Title    	 string              `json:"title" bson:"title" required:"true"`
+	Images       []string            `json:"images" bson:"images"`
+	Description  string              `json:"description" bson:"description" required:"true"`
+	Category     string    			 `json:"category" bson:"category" required:"true"`
+	Features     []string            `json:"features" bson:"features"`
+	Tags      	 []string            `json:"tags" bson:"tags"`
+	IsAvailable  bool      			 `json:"is_available" bson:"is_available"`
+	Views        int       			 `json:"views" bson:"views"`
+	ColorOptions map[string]string `json:"color_options" bson:"color_options"`
+	CreatedAt 	 time.Time           `json:"created_at" bson:"created_at"`
+	UpdatedAt 	 time.Time           `json:"updated_at" bson:"updated_at"`
 }
 
 type Like struct {
@@ -39,20 +39,21 @@ type Like struct {
 	IsLiked 	bool               `json:"is_liked" bson:"is_liked"`
 }
 
-type ColorOption struct {
-    Name  string `json:"name" bson:"name"`
-    Image string `json:"image" bson:"image"`
+type Pagination struct {
+	Page     int `form:"page" json:"page"`
+	PageSize int `form:"page_size" json:"page_size"`
 }
 
-type Pagination struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+type GetProductsRequest struct{
+	Pagination  	`form:"pagination" bson:"pagination"`
+	Category string	`form:"category" bson:"category"`
+	Tag string		`form:"tag" bson:"tag"`
 }
 
 type ProductUseCase interface {
 	CreateProduct(c context.Context, product *Product) (Product, error)
-	GetProduct(c context.Context, id string) (*Product, error)
-	GetProducts(c context.Context, pagination *Pagination) ([]*Product, error)
+	GetProductByID(c context.Context, id string) (*Product,bool, error)
+	GetProducts(c context.Context, pagination *Pagination, filter interface{}) ([]*Product, error)
 	UpdateProduct(c context.Context, product *Product, product_id string) error
 	DeleteProduct(c context.Context, id string) error
 	UploadProductImages(ctx context.Context, files map[string]io.Reader, serverAdress string) ([]string, error)
@@ -63,8 +64,8 @@ type ProductUseCase interface {
 
 type ProductRepository interface {
 	CreateProduct(c context.Context, Product *Product) (Product, error)
-	GetProduct(c context.Context, id string) (*Product, error)
-	GetProducts(c context.Context, pagination *Pagination) ([]*Product, error)
+	GetProductByID(c context.Context, id string) (*Product, bool, error)
+	GetProducts(c context.Context, pagination *Pagination, filter interface{}) ([]*Product, error)
 	UpdateProduct(c context.Context, Product *Product) error
 	DeleteProduct(c context.Context, id string) error
 	SearchProducts(ctx context.Context, query string) ([]*Product, error)

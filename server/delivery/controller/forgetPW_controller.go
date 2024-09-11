@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 type ForgetPWController struct {
 	Userusecase domain.UserUsecase
 	ForgetPWUsecase domain.ForgetPWUsecase
@@ -28,19 +27,19 @@ func (fpc *ForgetPWController) ForgetPW(c *gin.Context) {
 	var request domain.ForgetPWRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
 	user, err := fpc.Userusecase.GetUserByEmail(c, request.Email)
 	if err != nil {
-		c.JSON(http.StatusNotFound,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusNotFound,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
 	err = fpc.ForgetPWUsecase.ForgetPW(c, user.Email, fpc.Env.ServerAddress)
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -52,36 +51,36 @@ func (fpc *ForgetPWController) ResetPW(c *gin.Context) {
 
 	email, ok := c.GetQuery("user")
 	if !ok{
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:"Invalid password recovery token"})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:"Invalid password recovery token"})
 		return
 	}
 	recovery_token, ok := c.GetQuery("token")
 	if !ok{
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:"Invalid password recovery token"})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:"Invalid password recovery token"})
 		return
 	}
 
 	err := fpc.ForgetPWUsecase.VerifyForgetPWRequest(c, email, recovery_token)
 
 	if err != nil{
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
 	err = c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
 	user, err := fpc.Userusecase.GetUserByEmail(c, request.Email)
 	if err != nil {
-		c.JSON(http.StatusNotFound,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusNotFound,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
 	if user.Email != email{
-		c.JSON(http.StatusUnauthorized,domain.ErrorResponse{Message:"Email does not match"})
+		c.JSON(http.StatusUnauthorized,domain.ErrorResponse{Error:"Email does not match"})
 		return
 	}
 
@@ -94,7 +93,7 @@ func (fpc *ForgetPWController) ResetPW(c *gin.Context) {
 
 	err = fpc.Userusecase.UpdateUser(c, updatedUser)
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 

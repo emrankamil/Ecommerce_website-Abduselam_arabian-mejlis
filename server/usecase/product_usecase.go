@@ -16,9 +16,10 @@ type productUseCase struct {
 	contextTimeout time.Duration
 }
 
-func NewProductUseCase(productRepo domain.ProductRepository) domain.ProductUseCase {
+func NewProductUseCase(productRepo domain.ProductRepository, timeout time.Duration) domain.ProductUseCase {
 	return &productUseCase{
 		productRepo: productRepo,
+		contextTimeout: timeout,
 	}
 }
 
@@ -28,16 +29,16 @@ func (pu *productUseCase) CreateProduct(ctx context.Context, product *domain.Pro
 	return pu.productRepo.CreateProduct(ctx, product)
 }
 
-func (pu *productUseCase) GetProduct(ctx context.Context, id string) (*domain.Product, error) {
+func (pu *productUseCase) GetProductByID(ctx context.Context, id string) (*domain.Product, bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, pu.contextTimeout)
 	defer cancel()
-	return pu.productRepo.GetProduct(ctx, id)
+	return pu.productRepo.GetProductByID(ctx, id)
 }
 
-func (pu *productUseCase) GetProducts(ctx context.Context, pagination *domain.Pagination) ([]*domain.Product, error) {
+func (pu *productUseCase) GetProducts(ctx context.Context, pagination *domain.Pagination, filter interface{}) ([]*domain.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, pu.contextTimeout)
 	defer cancel()
-	return pu.productRepo.GetProducts(ctx, pagination)
+	return pu.productRepo.GetProducts(ctx, pagination, filter)
 }
 
 func (pu *productUseCase) UpdateProduct(ctx context.Context, product *domain.Product, productID string) error {
@@ -87,7 +88,6 @@ func (pu *productUseCase) UploadProductImages(ctx context.Context, files map[str
             return nil, err
         }
 
-
 		filename, err := utils.ImageProcessing(buffer, domain.ImageQuality, domain.ImageUploadFolder)
         if err != nil {
             return nil, err
@@ -99,5 +99,4 @@ func (pu *productUseCase) UploadProductImages(ctx context.Context, files map[str
 	}
 
 	return paths, nil
-
 }

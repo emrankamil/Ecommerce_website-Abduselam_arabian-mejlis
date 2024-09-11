@@ -43,7 +43,7 @@ func (chr *chatRepository) GetMessagesByID(c context.Context, userID string, adm
             {"sender_id": userID, "recipient_id": adminID},
         },
     }
-	opts := options.Find().SetSort(bson.D{{"timestamp", -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: -1}})
 	
 	cursor, err := collection.Find(c, filter, opts)
 

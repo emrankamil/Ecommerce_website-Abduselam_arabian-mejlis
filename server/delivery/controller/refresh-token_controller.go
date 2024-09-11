@@ -28,7 +28,7 @@ func (rc *RefreshTokenController) RefreshTokenRequest(c *gin.Context) {
 	var request domain.RefreshTokenRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusBadRequest,domain.ErrorResponse{Error:err.Error()})
 		return
 	}
 
@@ -41,12 +41,12 @@ func (rc *RefreshTokenController) RefreshTokenRequest(c *gin.Context) {
 
 	user, err := rc.UserUsecase.GetUserByID(c, claims.User_id)
 	if err != nil {
-		c.JSON(http.StatusNotFound,domain.ErrorResponse{Message:err.Error()})
+		c.JSON(http.StatusNotFound,domain.ErrorResponse{Error:err.Error()})
 	}
 
 	accessToken, err := rc.refreshTokenUsecase.CreateAccessToken(user, rc.Env.AccessTokenSecret, rc.Env.AccessTokenExpiryHour)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -59,7 +59,7 @@ func (rc *RefreshTokenController) RefreshTokenRequest(c *gin.Context) {
 	err = rc.UserUsecase.UpdateUser(c, updatedUser)
 
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
 		return
 	}
 
