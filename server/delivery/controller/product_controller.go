@@ -46,41 +46,6 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 }
 
 func (pc *ProductController) GetProductByID(c *gin.Context) {
-	// id := c.Param("id")
-
-	// cachedProduct, err := pc.RedisClient.Get(c, id).Bytes()
-	// if err == redis.Nil{
-	// 	product, err := pc.ProductUseCase.GetProductByID(c, id)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
-	// 		return
-	// 	}
-	// 	// marshal the blog
-	// 	blogM, err := json.Marshal(product)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusOK, domain.SuccessResponse{Success: false, Message: "Product Fetched without caching: " + err.Error(), Data: product})
-	// 		return
-	// 	}
-
-	// 	err = pc.RedisClient.Set(c, id, blogM, 0)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusOK, domain.SuccessResponse{Success: false, Message: "Product Fetched without caching: " + err.Error(), Data: product})
-	// 		return
-	// 	}
-	// 	c.JSON(http.StatusOK, domain.SuccessResponse{Success: true, Message: "Product Fetched Successfully", Data: product})
-	// 	return
-
-	// } else if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Error: err.Error()})
-	// 	return
-	// }
-
-	// responseBody := map[string]interface{}{}
-	// //Unmarshal cached key
-	// json.Unmarshal(cachedProduct, &responseBody)
-
-	// c.JSON(http.StatusOK, domain.SuccessResponse{Success: true, Message: "Product Fetched From cache Successfully", Data: responseBody})
-
 	id := c.Param("id")
 	
     product, fromCache, err := pc.ProductUseCase.GetProductByID(c, id)

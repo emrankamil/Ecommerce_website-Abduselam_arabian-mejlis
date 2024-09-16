@@ -18,18 +18,21 @@ const (
 )
 
 type Product struct {
-	ID           primitive.ObjectID  `json:"id" bson:"_id"`
-	Title    	 string              `json:"title" bson:"title" required:"true"`
-	Images       []string            `json:"images" bson:"images"`
-	Description  string              `json:"description" bson:"description" required:"true"`
-	Category     string    			 `json:"category" bson:"category" required:"true"`
-	Features     []string            `json:"features" bson:"features"`
-	Tags      	 []string            `json:"tags" bson:"tags"`
-	IsAvailable  bool      			 `json:"is_available" bson:"is_available"`
-	Views        int       			 `json:"views" bson:"views"`
-	ColorOptions map[string]string `json:"color_options" bson:"color_options"`
-	CreatedAt 	 time.Time           `json:"created_at" bson:"created_at"`
-	UpdatedAt 	 time.Time           `json:"updated_at" bson:"updated_at"`
+	ID           	primitive.ObjectID  `json:"id" bson:"_id"`
+	Title    	 	string              `json:"title" bson:"title" required:"true"`
+	Title_AM     	string   			 `json:"title_am" bson:"title_am" required:"true"`
+	Images       	[]string            `json:"images" bson:"images"`
+	Description  	string              `json:"description" bson:"description" required:"true"`
+	Description_AM  string				`json:"description_am" bson:"description_am" required:"true"`
+	Category     	string    			 `json:"category" bson:"category" required:"true"`
+	Features     	[]string            `json:"features" bson:"features"`
+	Features_AM     []string            `json:"features_am" bson:"features_am"`
+	Tags      	 	[]string            `json:"tags" bson:"tags"`
+	IsAvailable  	bool      			 `json:"is_available" bson:"is_available"`
+	Views        	int       			 `json:"views" bson:"views"`
+	ColorOptions 	map[string]string `json:"color_options" bson:"color_options"`
+	CreatedAt 	 	time.Time           `json:"created_at" bson:"created_at"`
+	UpdatedAt 	 	time.Time           `json:"updated_at" bson:"updated_at"`
 }
 
 type Like struct {

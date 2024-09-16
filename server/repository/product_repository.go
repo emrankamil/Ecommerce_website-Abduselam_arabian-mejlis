@@ -44,23 +44,6 @@ func (r *productRepository) CreateProduct(c context.Context, product *domain.Pro
 }
 
 func (r *productRepository) GetProductByID(c context.Context, id string) (*domain.Product, bool, error) {
-	// collection := r.database.Collection(r.collection)
-
-	// objectID, err := primitive.ObjectIDFromHex(id)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// var product domain.Product
-	// err = collection.FindOne(c, bson.M{"_id": objectID}).Decode(&product)
-	// if err != nil {
-	// 	if err == mongo.ErrNoDocuments {
-	// 		return nil, nil // product not found
-	// 	}
-	// 	return nil, err
-	// }
-
-	// return &product, nil
 
 	var product domain.Product
 	cachedProduct, err := r.RedisClient.Get(c, id).Bytes()
