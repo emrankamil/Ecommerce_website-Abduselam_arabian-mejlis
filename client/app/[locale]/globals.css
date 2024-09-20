@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html{
+  font-family: var(--my-font-family, sans-serif);
+}
+
+.navbar {
+  @apply fixed w-full bg-white z-50 px-4 sm:px-6 lg:px-8 transition-all duration-500;
+}

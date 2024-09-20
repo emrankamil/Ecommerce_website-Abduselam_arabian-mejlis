@@ -1,0 +1,29 @@
+import Hero from "@/components/home/Hero";
+import initTranslations from "../i18n";
+import TranslationsProvider from "@/components/TranslationsProvider";
+import CompanyVideo from "@/components/home/CompanyVideo";
+import FeaturesPage from "@/components/home/FeaturesPage";
+
+const i18nNamespaces = ["home"];
+
+export default async function Home({ params: { locale } }:any) {
+  const { t, resources } = await initTranslations(locale, i18nNamespaces);
+
+  return (
+    <TranslationsProvider
+      namespaces={i18nNamespaces}
+      locale={locale}
+      resources={resources}
+    >
+      <div className="flex flex-col gap-24">
+        <Hero params={{
+          locale: locale
+        }}/>
+        <CompanyVideo/>
+        <FeaturesPage params={{
+          locale: locale
+        }}/>
+      </div>
+    </TranslationsProvider>
+  );
+}
