@@ -27,8 +27,10 @@ const NavBar = () => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
       const navbarHeight = 90
+      console.log('use effect fired')
 
       if (currentScrollPos > navbarHeight) {
+        
         // Apply scroll logic only after scrolling past the navbar height
         if (prevScrollpos > currentScrollPos) {
           setTop(0); // Show navbar
@@ -47,6 +49,17 @@ const NavBar = () => {
 
       setPrevScrollpos(currentScrollPos);
     };
+
+    const checkInitialScroll = () => {
+      const currentScrollPos = window.scrollY;
+      const navbarHeight = 90;
+
+      if (currentScrollPos > navbarHeight) {
+        setBackgroundTransparent(false);
+      }
+    };
+
+    checkInitialScroll();
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleScroll);
