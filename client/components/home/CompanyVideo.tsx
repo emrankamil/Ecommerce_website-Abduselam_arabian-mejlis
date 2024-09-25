@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { IoCloseSharp } from "react-icons/io5";
@@ -8,12 +8,12 @@ import { useState } from "react";
 function CompanyVideo() {
   const { t } = useTranslation();
   const [videoVisible, setVideoVisible] = useState(false);
-  const videoId = "t2LMvk7CKJ0"; 
+  const videoId = "t2LMvk7CKJ0";
 
   return (
-    <div className="w-full h-screen flex items-center justify-center py-6 px-16">
-      <div className="relative bg-[url('/video-image.jpg')] bg-cover bg-left rounded-xl h-full w-full">
-        <div className="absolute inset-0 bg-black bg-opacity-30 rounded-xl"></div>
+    <div className="w-full h-screen flex items-center justify-center py-4">
+      <div className="relative bg-[url('/video-image.jpg')] bg-cover bg-left h-full w-full">
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
         <div className="absolute bottom-16 left-16 text-white">
           <h1 className="mb-4 text-disp">{t("watch_video")}</h1>
@@ -69,6 +69,6 @@ function CompanyVideo() {
       </div>
     </div>
   );
-};
+}
 
 export default CompanyVideo;

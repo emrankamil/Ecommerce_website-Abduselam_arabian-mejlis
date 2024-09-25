@@ -1,42 +1,58 @@
-'use client'
-import React, { useState } from 'react'
-import categories from '@/data/catagories'
-import { Category } from '@/data/catagories'
-import Image from 'next/image';
+"use client";
+import React, { useState } from "react";
+import categories from "@/data/catagories";
+import { Category } from "@/data/catagories";
+import Image from "next/image";
 
 const images = [
-    { src: "/arabic_board.png", alt: "Image 1" },
-    { src: "/gray-logo.png", alt: "Image 2" },
-    { src: "/hero-image.png", alt: "Image 3" },
-  ];
+  { src: "/arabic_board.png", alt: "Image 1" },
+  { src: "/gray-logo.png", alt: "Image 2" },
+  { src: "/hero-image.png", alt: "Image 3" },
+];
 
 const Catagories = () => {
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [hoveredImage, setHoveredImage] = useState(2);
-  
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const getStyle = (index: number) => ({
+    width: hoveredIndex === index ? "50%" : "25%",
+    transition: "width 0.3s ease",
+  });
+
   return (
     <div className="w-full h-screen py-16 -my-16 px-8">
       <div className="flex justify-center items-center h-full">
         {/* Images  */}
-        <div className="w-2/3 flex h-full">
-          <div className="w-1/4 p-4">
+        <div className="group w-2/3 flex h-full">
+          <div
+            className="w-1/4 p-4 "
+            style={getStyle(0)}
+            onMouseEnter={() => setHoveredIndex(0)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
             <Image
               src={"/video-image.jpg"}
               alt={""}
               width={1000}
               height={1000}
               className="h-full object-cover"
-              style={{borderRadius: "1rem"}}
+              style={{ borderRadius: "1rem" }}
             />
           </div>
-          <div className="w-1/4 p-4 ">
+          <div
+            className="w-1/4 p-4 "
+            style={getStyle(1)}
+            onMouseEnter={() => setHoveredIndex(1)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
             <Image
               src={"/video-image.jpg"}
               alt={""}
               width={1000}
               height={1000}
               className="h-full object-cover"
-              style={{borderRadius: "1rem"}}
+              style={{ borderRadius: "1rem" }}
             />
           </div>
           <div className="w-1/2 p-4 ">
@@ -46,7 +62,7 @@ const Catagories = () => {
               width={1000}
               height={1000}
               className="h-full object-cover"
-              style={{borderRadius: "1rem"}}
+              style={{ borderRadius: "1rem" }}
             />
           </div>
         </div>
@@ -85,28 +101,21 @@ const Catagories = () => {
       </div>
     </div>
   );
-}
+};
 
-export default Catagories
+export default Catagories;
 
-const CategoryDetail: React.FC<Category> = ({
-  name,
-  description,
-}) => {
+const CategoryDetail: React.FC<Category> = ({ name, description }) => {
   return (
-    <div className="w-full rounded-md" style={{ borderRadius: "1rem" }}>
+    <div className="w-full ">
       {/* Displaying the selected category's description */}
-      <div className="rounded-md bg-primary text-white p-6 shadow-md transition-opacity duration-500 ease-in-out opacity-100">
+      <div className="rounded-xl bg-primary text-white p-6 shadow-md transition-opacity duration-500 ease-in-out opacity-100">
         <h3 className="text-xl font-bold">{name}</h3>
         <p className="text-sm mt-3">{description}</p>
       </div>
     </div>
   );
 };
-
-
-
-
 
 const ToggleDescription = () => {
   const [isVisible, setIsVisible] = useState(false);

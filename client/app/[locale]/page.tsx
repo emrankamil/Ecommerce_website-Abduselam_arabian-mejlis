@@ -18,7 +18,7 @@ export default async function Home({ params: { locale } }: any) {
       locale={locale}
       resources={resources}
     >
-      <div className="flex flex-col gap-24 h-full">
+      <div className="flex flex-col gap-32 h-full w-full mx-auto">
         <Hero
           params={{
             locale: locale,
